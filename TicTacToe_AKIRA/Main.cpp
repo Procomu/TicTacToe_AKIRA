@@ -130,16 +130,16 @@ int inputColumn() {
 	fflush(stdin);
 	scanf("%d", &column);
 	switch(column) {
-	case 1:
-	case 2:
-	case 3:
-		result = column;
-		return result;
-		break;
-	default:
-		printf("Please retry.\n");
-		inputColumn();
-		break;
+		case 1:
+		case 2:
+		case 3:
+			result = column;
+			return result;
+			break;
+		default:
+			printf("Please retry.\n");
+			inputColumn();
+			break;
 	}
 }
 

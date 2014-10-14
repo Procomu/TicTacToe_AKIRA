@@ -226,6 +226,7 @@ void changePlayer() {
 	 * 0 ^ 1 = 1
 	 * 1 ^ 0 = 1
 	 * 1 ^ 1 = 0
+	 * player ^= 1; => player = player ^ 1;
 	*/
 	player ^= 1;
 }

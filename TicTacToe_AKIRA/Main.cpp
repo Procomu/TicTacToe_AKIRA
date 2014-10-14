@@ -1,52 +1,70 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 
+/*
+ * define is User-defined functions.
+*/
 #define EMPTY 0
-#define BLACK -1
-#define WHITE 1
+#define BLACK_STONE -1
+#define WHITE_STONE 1
+#define OUT_OF_CELL 9
 
+// Global values
 int board[5][5];		// -1, 0, 1
 int stone;			// -1, 1
 int player;			// 0, 1
-char row;			// a, b, c
-int temp_row;			// 0, 1, 2
-int column;			// 0, 1, 2
+int judge;
 
+// Function declaration
 void initBoard();
 void initStone();
 void initPlayer();
 void showBoard();
-void input();
-int putableStone();
-int checkWin(int index_r,int index_c);
+int inputRow();
+int inputColumn();
+void putableStone(int column, int row);
+int checkWin();
 void changeStone();
 void changePlayer();
 void dispWinner();
 
 int main() {
 	initBoard();
-	initStone();
 	initPlayer();
-	showBoard();
-	input();
-	while(-1 == checkWin(0, 0)) {
+	initStone();
+	printf("Start Game!\n\n");
+	while(!judge) {
 		showBoard();
-		input();
+		printf("Player %d\n", player+1);
+		putableStone(inputColumn(), inputRow());
+		changePlayer();
+		changeStone();
 	}
-	dispWinner();
 	return 0;
 }
 
 void initBoard() {
 	for(int i=0; i<5; i++) {
 		for(int j=0; j<5; j++) {
-			board[i][j] = EMPTY;
+			switch(i) {
+				case 0:
+				case 4:
+					board[i][j] = OUT_OF_CELL;
+					break;
+				case 1:
+				case 2:
+				case 3:
+					board[i][j] = EMPTY;
+					break;
+				default:
+					break;
+			}
 		}
 	}
 }
 
 void initStone() {
-	stone = BLACK;
+	stone = BLACK_STONE;
 }
 
 void initPlayer() {
@@ -55,96 +73,86 @@ void initPlayer() {
 
 void showBoard() {
 	for(int i=1; i<4; i++) {
+		printf("-------\n");
 		for(int j=1; j<4; j++) {
+			printf("|");
 			switch(board[i][j]) {
 			case EMPTY:
 				printf("?");
 				break;
-			case BLACK:
+			case BLACK_STONE:
 				printf("O");
 				break;
-			case WHITE:
+			case WHITE_STONE:
 				printf("X");
 				break;
 			default:
 				break;
 			}
 		}
-		printf("\n");
+		printf("|\n");
 	}
-	printf("\n");
+	printf("-------\n");
 }
 
-void input() {
-	row = NULL;
-	column = NULL;
-	printf("Please input row : ");
+int inputRow() {
+	int result = -1;
+	char row;
+	printf("Please input row(a, b, c) : ");
 	fflush(stdin);
 	scanf("%c", &row);
 	switch(row) {
 		case 'a':
-			temp_row = 1;
+			result = 1;
+			return result;
 			break;
 		case 'b':
-			temp_row = 2;
+			result = 2;
+			return result;
 			break;
 		case 'c':
-			temp_row = 3;
+			result = 3;
+			return result;
 			break;
 		default:
-			printf("Wrong row.");
-			printf("Prease retry.\n");
-			input();
+			printf("Please retry.\n");
+			inputRow();
 			break;
 	}
-	printf("Please input column : ");
+}
+
+int inputColumn() {
+	int result = -1;
+	int column;
+	printf("Please input column(1, 2, 3) : ");
+	fflush(stdin);
 	scanf("%d", &column);
 	switch(column) {
-		case 1:
-		case 2:
-		case 3:
-			if(putableStone()) {
-				board[temp_row][column] = stone;
-				changeStone();
-				changePlayer();
-			} else {
-				printf("Wrong column.");
-				printf("Prease retry.\n");
-				input();
-			}
-			break;
-		default:
-			printf("Wrong column.");
-			printf("Prease retry.\n");
-			input();
-			break;
+	case 1:
+	case 2:
+	case 3:
+		result = column;
+		return result;
+		break;
+	default:
+		printf("Please retry.\n");
+		inputColumn();
+		break;
 	}
 }
 
-int putableStone() {
-	int result = -1;
-	if(EMPTY == board[temp_row][column]) {
-		int result = 1;
-	}
-	return result;
-}
-
-int checkWin(int index_r, int index_c) {
-	int result = -1;
-	int dir_r[8] ={0, -1, -1, -1, 0, 1, 1, 1};
-	int dir_c[8] ={1, 1, 0, -1, -1, -1, 0, 1};
-	if(stone == board[temp_row+dir_r[index_r]][column+dir_r[index_c]]) {
-		if(2 == index_r) {
-			result = 1;
-		} else {
-			if(7 > index_r) {
-				checkWin(index_r+1, index_c+1);
-			}
-		}
+void putableStone(int column, int row) {
+	char rowChar[] = {'a', 'b', 'c'};
+	if(EMPTY == board[row][column]) {
+		board[row][column] = stone;
 	} else {
-		checkWin(index_r+1, index_c+1);
+		printf("Not empty this cell\nrow : %c, column : %d\n", rowChar[row-1], column);
+		putableStone(inputColumn(), inputRow());
 	}
-	return result;
+	return;
+}
+
+void checkWin() {
 }
 
 void changeStone() {
@@ -152,11 +160,14 @@ void changeStone() {
 }
 
 void changePlayer() {
-	if(0 == player) {
-		player = 1;
-	} else if(1 == player) {
-		player = 0;
-	}
+	/* 
+	 * '^' is XOR mark.
+	 * 0 ^ 0 = 0
+	 * 0 ^ 1 = 1
+	 * 1 ^ 0 = 1
+	 * 1 ^ 1 = 0
+	*/
+	player ^= 1;
 }
 
 void dispWinner() {

@@ -4,13 +4,14 @@
 /*
  * define is User-defined functions.
 */
-#define EMPTY 0
+#define BOARD_SIZE 5
+#define EMPTY_CELL 0
 #define BLACK_STONE -1
 #define WHITE_STONE 1
 #define OUT_OF_CELL 9
 
 // Global values
-int board[5][5];		// -1, 0, 1
+int board[BOARD_SIZE][BOARD_SIZE];		// -1, 0, 1
 int stone;			// -1, 1
 int player;			// 0, 1
 int judge;
@@ -23,7 +24,7 @@ void showBoard();
 int inputRow();
 int inputColumn();
 void putableStone(int column, int row);
-int checkWin();
+void checkWin();
 void changeStone();
 void changePlayer();
 void dispWinner();
@@ -44,8 +45,8 @@ int main() {
 }
 
 void initBoard() {
-	for(int i=0; i<5; i++) {
-		for(int j=0; j<5; j++) {
+	for(int i=0; i<BOARD_SIZE; i++) {
+		for(int j=0; j<BOARD_SIZE; j++) {
 			switch(i) {
 				case 0:
 				case 4:
@@ -54,7 +55,7 @@ void initBoard() {
 				case 1:
 				case 2:
 				case 3:
-					board[i][j] = EMPTY;
+					board[i][j] = EMPTY_CELL;
 					break;
 				default:
 					break;
@@ -77,7 +78,7 @@ void showBoard() {
 		for(int j=1; j<4; j++) {
 			printf("|");
 			switch(board[i][j]) {
-			case EMPTY:
+			case EMPTY_CELL:
 				printf("?");
 				break;
 			case BLACK_STONE:
@@ -143,10 +144,10 @@ int inputColumn() {
 
 void putableStone(int column, int row) {
 	char rowChar[] = {'a', 'b', 'c'};
-	if(EMPTY == board[row][column]) {
+	if(EMPTY_CELL == board[row][column]) {
 		board[row][column] = stone;
 	} else {
-		printf("Not empty this cell\nrow : %c, column : %d\n", rowChar[row-1], column);
+		printf("Not EMPTY_CELL this cell\nrow : %c, column : %d\n", rowChar[row-1], column);
 		putableStone(inputColumn(), inputRow());
 	}
 	return;

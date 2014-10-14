@@ -33,14 +33,15 @@ int main() {
 	initBoard();
 	initPlayer();
 	initStone();
-	printf("Start Game!\n\n");
+	printf("Start Game!\n");
 	while(!judge) {
+		printf("\n");
 		showBoard();
 		printf("Player %d\n", player+1);
 		putableStone(inputColumn(), inputRow());
-		changePlayer();
-		changeStone();
+		checkWin();
 	}
+	dispWinner();
 	return 0;
 }
 
@@ -79,7 +80,7 @@ void showBoard() {
 			printf("|");
 			switch(board[i][j]) {
 			case EMPTY_CELL:
-				printf("?");
+				printf(" ");
 				break;
 			case BLACK_STONE:
 				printf("O");
@@ -154,6 +155,64 @@ void putableStone(int column, int row) {
 }
 
 void checkWin() {
+	int check = 0;
+	// check row
+	for(int i=1; i<BOARD_SIZE-1; i++) {
+		for(int j=1; j<BOARD_SIZE-1; j++) {
+			if(stone != board[i][j]) {
+				break;
+			} else {
+				check++;
+			}
+		}
+		if(3 == check) {
+			judge = 1;
+			return;
+		}
+		check = 0;
+	}
+	// check column
+	for(int i=1; i<BOARD_SIZE-1; i++) {
+		for(int j=1; j<BOARD_SIZE-1; j++) {
+			if(stone != board[j][i]) {
+				break;
+			} else {
+				check++;
+			}
+		}
+		if(3 == check) {
+			judge = 1;
+			return;
+		}
+		check = 0;
+	}
+	// check skew1
+	for(int i=1; i<BOARD_SIZE-1; i++) {
+		if(stone != board[i][i]) {
+			break;
+		} else {
+			check++;
+		}
+	}
+	if(3 == check) {
+		judge = 1;
+		return;
+	}
+	// check skew2
+	for(int i=BOARD_SIZE-2; i>0; i--) {
+		if(stone != board[i][i]) {
+			break;
+		} else {
+			check++;
+		}
+	}
+	if(3 == check) {
+		judge = 1;
+		return;
+	}
+	check = 0;
+	changePlayer();
+	changeStone();
 }
 
 void changeStone() {
@@ -172,5 +231,6 @@ void changePlayer() {
 }
 
 void dispWinner() {
-	printf("The Winner is PLayer%d", player+1);
+	showBoard();
+	printf("The Winner is Player%d\n", player+1);
 }

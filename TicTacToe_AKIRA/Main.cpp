@@ -219,9 +219,20 @@ void checkWin() {
 	changeStone();
 }
 
-void _checkWin(int row, int column) {
+void _checkWin(int counter, int row, int column, int idx_r, int idx_c) {
 	int dir_r[8] ={-1, -1, 0, 1, 1, 1, 0, -1};
 	int dir_c[8] ={0, 1, 1, 1, 0, -1, -1, -1};
+	if(8 != idx_r || 8 != idx_c) {
+		switch(board[dir_r[row+idx_r]][column+dir_c[idx_c]]) {
+		case OUT_OF_BOARD:
+		case EMPTY_CELL:
+			_checkWin(0, row, column, ++idx_r, ++idx_c);
+			break;
+		case stone:
+			_checkWin(++counter, row, column, idx_r, idx_c);
+			break;
+		}
+	}
 }
 
 void changeStone() {

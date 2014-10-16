@@ -23,13 +23,15 @@ void initPlayer();
 void showBoard();
 int inputRow();
 int inputColumn();
-void putableStone(int column, int row);
+void putableStone(int row, int column);
 void checkWin();
 void changeStone();
 void changePlayer();
 void dispWinner();
 
 int main() {
+	int row;
+	int column;
 	initBoard();
 	initPlayer();
 	initStone();
@@ -38,7 +40,9 @@ int main() {
 		printf("\n");
 		showBoard();
 		printf("Player %d\n", player+1);
-		putableStone(inputColumn(), inputRow());
+		row = inputRow();
+		column = inputColumn();
+		putableStone(row, column);
 		checkWin();
 	}
 	dispWinner();
@@ -143,7 +147,7 @@ int inputColumn() {
 	}
 }
 
-void putableStone(int column, int row) {
+void putableStone(int row, int column) {
 	char rowChar[] = {'a', 'b', 'c'};
 	if(EMPTY_CELL == board[row][column]) {
 		board[row][column] = stone;
@@ -215,6 +219,11 @@ void checkWin() {
 	changeStone();
 }
 
+void _checkWin(int row, int column) {
+	int dir_r[8] = {-1, -1, 0, 1, 1, 1, 0, -1};
+	int dir_c[8] = {0, 1, 1, 1, 0, -1, -1, -1};
+}
+
 void changeStone() {
 	stone *= -1;
 }
@@ -231,6 +240,7 @@ void changePlayer() {
 }
 
 void dispWinner() {
+	printf("\n");
 	showBoard();
 	printf("The Winner is Player%d\n", player+1);
 }

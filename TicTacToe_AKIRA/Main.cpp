@@ -220,8 +220,8 @@ void checkWin() {
 }
 
 void _checkWin(int row, int column) {
-	int dir_r[8] = {-1, -1, 0, 1, 1, 1, 0, -1};
-	int dir_c[8] = {0, 1, 1, 1, 0, -1, -1, -1};
+	int dir_r[8] ={-1, -1, 0, 1, 1, 1, 0, -1};
+	int dir_c[8] ={0, 1, 1, 1, 0, -1, -1, -1};
 }
 
 void changeStone() {

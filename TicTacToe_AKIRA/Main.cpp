@@ -15,6 +15,7 @@ int board[BOARD_SIZE][BOARD_SIZE];		// -1, 0, 1
 int stone;			// -1, 1
 int player;			// 0, 1
 int judge;
+int turn;			// 0-8
 
 // Function declaration
 void initBoard();
@@ -25,21 +26,37 @@ int inputRow();
 int inputColumn();
 void putableStone(int column, int row);
 void checkWin();
+void _checkWin(int flag, int count, int row, int column, int idx_r, int idx_c);
 void changeStone();
 void changePlayer();
 void dispWinner();
 
+
 int main() {
+//	int row;
+//	int column;
 	initBoard();
 	initPlayer();
 	initStone();
 	printf("Start Game!\n");
-	while(!judge) {
-		printf("\n");
-		showBoard();
-		printf("Player %d\n", player+1);
-		putableStone(inputColumn(), inputRow());
-		checkWin();
+	while(9 > turn) {
+		if(!judge) {
+			printf("\n");
+			printf("Turn : %d\n", turn);
+			showBoard();
+			printf("Player %d\n", player+1);
+			//		row = inputRow();
+			//		column = inputColumn();
+			putableStone(inputRow(), inputColumn());
+			checkWin();
+			/*
+			putableStone(row, column);
+			_checkWin(1, 0, row, column, 0, 0);
+			*/
+			turn++;
+		} else {
+			break;
+		}
 	}
 	dispWinner();
 	return 0;
@@ -143,13 +160,13 @@ int inputColumn() {
 	}
 }
 
-void putableStone(int column, int row) {
+void putableStone(int row, int column) {
 	char rowChar[] = {'a', 'b', 'c'};
 	if(EMPTY_CELL == board[row][column]) {
 		board[row][column] = stone;
 	} else {
 		printf("Not EMPTY_CELL this cell\nrow : %c, column : %d\n", rowChar[row-1], column);
-		putableStone(inputColumn(), inputRow());
+		putableStone(inputRow(), inputColumn());
 	}
 	return;
 }
@@ -157,9 +174,9 @@ void putableStone(int column, int row) {
 void checkWin() {
 	int check = 0;
 	// check row
-	for(int i=1; i<BOARD_SIZE-1; i++) {
-		for(int j=1; j<BOARD_SIZE-1; j++) {
-			if(stone != board[i][j]) {
+	for(int row=1; row<BOARD_SIZE-1; row++) {
+		for(int column=1; column<BOARD_SIZE-1; column++) {
+			if(stone != board[row][column]) {
 				break;
 			} else {
 				check++;
@@ -167,14 +184,14 @@ void checkWin() {
 		}
 		if(3 == check) {
 			judge = 1;
-			return;
+			break;
 		}
 		check = 0;
 	}
 	// check column
-	for(int i=1; i<BOARD_SIZE-1; i++) {
-		for(int j=1; j<BOARD_SIZE-1; j++) {
-			if(stone != board[j][i]) {
+	for(int row=1; row<BOARD_SIZE-1; row++) {
+		for(int column=1; column<BOARD_SIZE-1; column++) {
+			if(stone != board[row][column]) {
 				break;
 			} else {
 				check++;
@@ -182,7 +199,7 @@ void checkWin() {
 		}
 		if(3 == check) {
 			judge = 1;
-			return;
+			break;
 		}
 		check = 0;
 	}
@@ -211,6 +228,32 @@ void checkWin() {
 		return;
 	}
 	check = 0;
+	changePlayer();
+	changeStone();
+}
+
+void _checkWin(int flag, int count, int row, int column, int idx_r, int idx_c) {
+	int dir_r[6] ={-1, -2, -1, -2, 0, 0};
+	int dir_c[6] ={0, 0, 1, 2, 1, 2};
+	if(3 != count) {
+		if(stone == board[row+(dir_r[idx_r]*flag)][column+(dir_c[idx_c]*flag)]) {
+			_checkWin(flag, ++count, row, column, ++idx_r, ++idx_c);
+			return;
+		} else if(OUT_OF_CELL == board[row+(dir_r[idx_r]*flag)][column+(dir_c[idx_c]*flag)]) {
+			if(-1 != flag) {
+				flag = -1;
+				_checkWin(flag, count, row, column, idx_r, idx_c);
+			} else {
+				flag = 1;
+				count = 0;
+				_checkWin(flag, count, row, column, ++idx_r, ++idx_c);
+			}
+			return;
+		}
+	} else {
+		judge = 1;
+		return;
+	}
 	changePlayer();
 	changeStone();
 }

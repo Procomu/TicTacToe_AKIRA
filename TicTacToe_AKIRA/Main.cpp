@@ -1,52 +1,27 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
+#include <math.h>
 
-/*
- * define is User-defined functions.
-*/
 #define BOARD_SIZE 5
 #define EMPTY_CELL 0
 #define BLACK_STONE -1
 #define WHITE_STONE 1
 #define OUT_OF_CELL 9
 
-// Global values
-int board[BOARD_SIZE][BOARD_SIZE];		// -1, 0, 1
-int stone;			// -1, 1
-int player;			// 0, 1
-int judge;
+int player;
+int stone;
+int board[BOARD_SIZE][BOARD_SIZE];
+char row;
+int temp_row;
+int column;
+int putable;
 
-// Function declaration
-void initBoard();
-void initStone();
-void initPlayer();
-void showBoard();
-int inputRow();
-int inputColumn();
-void putableStone(int row, int column);
-void checkWin();
-void changeStone();
-void changePlayer();
-void dispWinner();
+void initPlayer() {
+	 player = 0;
+}
 
-int main() {
-	int row;
-	int column;
-	initBoard();
-	initPlayer();
-	initStone();
-	printf("Start Game!\n");
-	while(!judge) {
-		printf("\n");
-		showBoard();
-		printf("Player %d\n", player+1);
-		row = inputRow();
-		column = inputColumn();
-		putableStone(row, column);
-		checkWin();
-	}
-	dispWinner();
-	return 0;
+void initStone() {
+	 stone = BLACK_STONE;
 }
 
 void initBoard() {
@@ -67,14 +42,6 @@ void initBoard() {
 			}
 		}
 	}
-}
-
-void initStone() {
-	stone = BLACK_STONE;
-}
-
-void initPlayer() {
-	player = 0;
 }
 
 void showBoard() {
@@ -101,138 +68,79 @@ void showBoard() {
 	printf("-------\n");
 }
 
-int inputRow() {
-	int result = -1;
-	char row;
-	printf("Please input row(a, b, c) : ");
+void putablestone() {
+	if(EMPTY_CELL == board[temp_row][column]){
+		putable = 0;
+	}else{
+		putable = 1;
+	}
+}
+
+void inputRow() {
+	printf("Please input row : ");
 	fflush(stdin);
 	scanf("%c", &row);
-	switch(row) {
-		case 'a':
-			result = 1;
-			return result;
+	switch(row){
+		case'a':
+			temp_row = 1;
 			break;
-		case 'b':
-			result = 2;
-			return result;
+		case'b':
+			temp_row = 2;
 			break;
-		case 'c':
-			result = 3;
-			return result;
+		case'c':
+			temp_row = 3;
 			break;
 		default:
-			printf("Please retry.\n");
+			printf("Please retry\n");
 			inputRow();
 			break;
-	}
-}
-
-int inputColumn() {
-	int result = -1;
-	int column;
-	printf("Please input column(1, 2, 3) : ");
-	fflush(stdin);
-	scanf("%d", &column);
-	switch(column) {
-		case 1:
-		case 2:
-		case 3:
-			result = column;
-			return result;
-			break;
-		default:
-			printf("Please retry.\n");
-			inputColumn();
-			break;
-	}
-}
-
-void putableStone(int row, int column) {
-	char rowChar[] = {'a', 'b', 'c'};
-	if(EMPTY_CELL == board[row][column]) {
-		board[row][column] = stone;
-	} else {
-		printf("Not EMPTY_CELL this cell\nrow : %c, column : %d\n", rowChar[row-1], column);
-		putableStone(inputColumn(), inputRow());
 	}
 	return;
 }
 
-void checkWin() {
-	int check = 0;
-	// check row
-	for(int i=1; i<BOARD_SIZE-1; i++) {
-		for(int j=1; j<BOARD_SIZE-1; j++) {
-			if(stone != board[i][j]) {
-				break;
-			} else {
-				check++;
-			}
-		}
-		if(3 == check) {
-			judge = 1;
-			return;
-		}
-		check = 0;
-	}
-	// check column
-	for(int i=1; i<BOARD_SIZE-1; i++) {
-		for(int j=1; j<BOARD_SIZE-1; j++) {
-			if(stone != board[j][i]) {
-				break;
-			} else {
-				check++;
-			}
-		}
-		if(3 == check) {
-			judge = 1;
-			return;
-		}
-		check = 0;
-	}
-	// check skew1
-	for(int i=1; i<BOARD_SIZE-1; i++) {
-		if(stone != board[i][i]) {
+void inputColumn() {
+	printf("Please input column : ");
+	fflush(stdin);
+	scanf("%d",&column);
+	switch(column){
+		case 1:
+		case 2:
+		case 3:
 			break;
-		} else {
-			check++;
-		}
-	}
-	if(3 == check) {
-		judge = 1;
-		return;
-	}
-	// check skew2
-	for(int i=BOARD_SIZE-2; i>0; i--) {
-		if(stone != board[i][i]) {
+		default:
+			printf("Pease retry\n");
+			inputColumn();
 			break;
-		} else {
-			check++;
+	}
+	return;
+} 
+
+int checkWin(int flag, int check_row, int check_column, int index_dir) {
+	if(4 > index_dir) {
+		int dir_r[4] ={-1, -1, 0, 1};
+		int dir_c[4] ={0, 1, 1, 1};
+		if(OUT_OF_CELL == board[temp_row + dir_r[index_dir * flag]][column + dir_c[index_dir * flag]]) {
+			if(1 == flag) {
+				flag = -1;
+				checkWin(flag, temp_row, column, index_dir);
+			} else if(-1 == flag) {
+				return 1;
+			}
+		} else if(EMPTY_CELL == board[temp_row + dir_r[index_dir * flag]][column + dir_c[index_dir * flag]]) {
+			flag = 1;
+			checkWin(flag, temp_row, column, ++index_dir);
+		} else if(stone != board[temp_row + dir_r[index_dir * flag]][column + dir_c[index_dir * flag]]) {
+			flag = 1;
+			checkWin(flag, temp_row, column, ++index_dir);
+		} else if(stone == board[temp_row + dir_r[index_dir * flag]][column + dir_c[index_dir * flag]]) {
+			checkWin(flag, check_row, check_column, index_dir);
 		}
 	}
-	if(3 == check) {
-		judge = 1;
-		return;
-	}
-	check = 0;
-	changePlayer();
-	changeStone();
+	return 0;
 }
 
-void _checkWin(int counter, int row, int column, int idx_r, int idx_c) {
-	int dir_r[8] ={-1, -1, 0, 1, 1, 1, 0, -1};
-	int dir_c[8] ={0, 1, 1, 1, 0, -1, -1, -1};
-	if(8 != idx_r || 8 != idx_c) {
-		switch(board[dir_r[row+idx_r]][column+dir_c[idx_c]]) {
-		case OUT_OF_BOARD:
-		case EMPTY_CELL:
-			_checkWin(0, row, column, ++idx_r, ++idx_c);
-			break;
-		case stone:
-			_checkWin(++counter, row, column, idx_r, idx_c);
-			break;
-		}
-	}
+void dispWinner() {
+	printf("The winner is Player%d!!\n", ++player);
 }
 
 void changeStone() {
@@ -240,19 +148,31 @@ void changeStone() {
 }
 
 void changePlayer() {
-	/* 
-	 * '^' is XOR mark.
-	 * 0 ^ 0 = 0
-	 * 0 ^ 1 = 1
-	 * 1 ^ 0 = 1
-	 * 1 ^ 1 = 0
-	 * player ^= 1; => player = player ^ 1;
-	*/
 	player ^= 1;
 }
-
-void dispWinner() {
-	printf("\n");
-	showBoard();
-	printf("The Winner is Player%d\n", player+1);
+ 		
+int main(int argc, char **argv) {
+	printf("Game Start!!\n");
+	initPlayer();
+	initStone();
+	initBoard();
+	for(int turn=0; turn<(int)pow(BOARD_SIZE-2, 2.0); turn++) {
+		showBoard();
+		printf("Turn : %d\n", turn);
+		inputRow();
+		inputColumn();
+		putablestone();
+		if(0 == putable){
+			board[temp_row][column] = stone;
+			if(checkWin(1, temp_row, column, 0)) {
+				showBoard();
+				dispWinner();
+				return 0;
+			}
+			changeStone();
+			changePlayer();
+		}
+	}
+	printf("Drow...\n");
+	return 0;
 }

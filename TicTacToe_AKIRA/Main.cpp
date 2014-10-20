@@ -1,6 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <math.h>
+#define _DEBUG
 
 #define BOARD_SIZE 5
 #define EMPTY_CELL 0
@@ -15,6 +16,7 @@ char row;
 int temp_row;
 int column;
 int putable;
+int judge;
 
 void initPlayer() {
 	 player = 0;
@@ -29,15 +31,14 @@ void initBoard() {
 		for(int j=0; j<BOARD_SIZE; j++) {
 			switch(i) {
 				case 0:
-				case 4:
+				case BOARD_SIZE - 1:
 					board[i][j] = OUT_OF_CELL;
 					break;
-				case 1:
-				case 2:
-				case 3:
-					board[i][j] = EMPTY_CELL;
-					break;
 				default:
+					board[i][j] = EMPTY_CELL;
+					if(0 == j || j == BOARD_SIZE - 1) {
+						board[i][j] = OUT_OF_CELL;
+					}
 					break;
 			}
 		}
@@ -45,9 +46,18 @@ void initBoard() {
 }
 
 void showBoard() {
-	for(int i=1; i<4; i++) {
+#ifdef DEBUG
+	for(int i=0; i<BOARD_SIZE; i++) {
+		for(int j=0; j<BOARD_SIZE; j++) {
+			printf("%d", board[i][j]);
+		}
+		printf("\n");
+	}
+	printf("\n");
+# else
+	for(int i=1; i<BOARD_SIZE - 1; i++) {
 		printf("-------\n");
-		for(int j=1; j<4; j++) {
+		for(int j=1; j<BOARD_SIZE - 1; j++) {
 			printf("|");
 			switch(board[i][j]) {
 			case EMPTY_CELL:
@@ -66,6 +76,7 @@ void showBoard() {
 		printf("|\n");
 	}
 	printf("-------\n");
+#endif
 }
 
 void putablestone() {
@@ -80,20 +91,12 @@ void inputRow() {
 	printf("Please input row : ");
 	fflush(stdin);
 	scanf("%c", &row);
-	switch(row){
-		case'a':
-			temp_row = 1;
-			break;
-		case'b':
-			temp_row = 2;
-			break;
-		case'c':
-			temp_row = 3;
-			break;
-		default:
+	temp_row = (int)row - 96;
+	if(temp_row<=0) {
+		if(BOARD_SIZE-1<=temp_row) {
 			printf("Please retry\n");
 			inputRow();
-			break;
+		}
 	}
 	return;
 }
@@ -101,42 +104,41 @@ void inputRow() {
 void inputColumn() {
 	printf("Please input column : ");
 	fflush(stdin);
-	scanf("%d",&column);
-	switch(column){
-		case 1:
-		case 2:
-		case 3:
-			break;
-		default:
-			printf("Pease retry\n");
-			inputColumn();
-			break;
+	scanf("%d", &column);
+	if(column < 1 || (BOARD_SIZE - 2) < column) {
+		printf("Please retry\n");
+		inputColumn();
 	}
 	return;
-} 
+}
 
-int checkWin(int flag, int check_row, int check_column, int index_dir) {
-	if(4 > index_dir) {
+void checkWin(int flag, int check_row, int check_column, int index_dir) {
+	if(index_dir < 4) {
 		int dir_r[4] ={-1, -1, 0, 1};
 		int dir_c[4] ={0, 1, 1, 1};
-		if(OUT_OF_CELL == board[temp_row + dir_r[index_dir * flag]][column + dir_c[index_dir * flag]]) {
+#ifdef DEBUG
+		printf("<DEBUG> check   row  : %d\n", temp_row + (dir_r[index_dir] * flag));
+		printf("<DEBUG> check column : %d\n", column + (dir_c[index_dir] * flag));
+		printf("\n");
+#endif
+		if(OUT_OF_CELL == board[temp_row + (dir_r[index_dir] * flag)][column + (dir_c[index_dir] * flag)]) {
 			if(1 == flag) {
 				flag = -1;
 				checkWin(flag, temp_row, column, index_dir);
 			} else if(-1 == flag) {
-				return 1;
+				judge = 1;
 			}
-		} else if(EMPTY_CELL == board[temp_row + dir_r[index_dir * flag]][column + dir_c[index_dir * flag]]) {
+		} else if(EMPTY_CELL == board[temp_row + (dir_r[index_dir] * flag)][column + (dir_c[index_dir] * flag)]) {
 			flag = 1;
 			checkWin(flag, temp_row, column, ++index_dir);
-		} else if(stone != board[temp_row + dir_r[index_dir * flag]][column + dir_c[index_dir * flag]]) {
+		} else if(stone != board[temp_row + (dir_r[index_dir] * flag)][column + (dir_c[index_dir] * flag)]) {
 			flag = 1;
 			checkWin(flag, temp_row, column, ++index_dir);
-		} else if(stone == board[temp_row + dir_r[index_dir * flag]][column + dir_c[index_dir * flag]]) {
+		} else if(stone == board[temp_row + (dir_r[index_dir] * flag)][column + (dir_c[index_dir] * flag)]) {
 			checkWin(flag, check_row, check_column, index_dir);
 		}
 	}
-	return 0;
+	return;
 }
 
 void dispWinner() {
@@ -158,13 +160,17 @@ int main(int argc, char **argv) {
 	initBoard();
 	for(int turn=0; turn<(int)pow(BOARD_SIZE-2, 2.0); turn++) {
 		showBoard();
+#ifdef DEBUG
 		printf("Turn : %d\n", turn);
+#endif
+		printf("Player %d\n", player + 1);
 		inputRow();
 		inputColumn();
 		putablestone();
 		if(0 == putable){
 			board[temp_row][column] = stone;
-			if(checkWin(1, temp_row, column, 0)) {
+			checkWin(1, temp_row, column, 0);
+			if(!judge) {
 				showBoard();
 				dispWinner();
 				return 0;

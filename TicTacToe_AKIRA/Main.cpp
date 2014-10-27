@@ -16,6 +16,7 @@ char row;
 int temp_row;
 int column;
 int putable;
+int drow;
 int judge;
 
 void initPlayer() {
@@ -46,6 +47,7 @@ void initBoard() {
 }
 
 void showBoard() {
+	printf("\n");
 #ifdef DEBUG
 	for(int i=0; i<BOARD_SIZE; i++) {
 		for(int j=0; j<BOARD_SIZE; j++) {
@@ -55,8 +57,22 @@ void showBoard() {
 	}
 	printf("\n");
 # else
+	printf("  1 2 3\n");
 	for(int i=1; i<BOARD_SIZE - 1; i++) {
-		printf("-------\n");
+		printf(" -------\n");
+		switch(i) {
+		case 1:
+			printf("a");
+			break;
+		case 2:
+			printf("b");
+			break;
+		case 3:
+			printf("c");
+			break;
+		case 4:
+			break;
+		}
 		for(int j=1; j<BOARD_SIZE - 1; j++) {
 			printf("|");
 			switch(board[i][j]) {
@@ -75,7 +91,7 @@ void showBoard() {
 		}
 		printf("|\n");
 	}
-	printf("-------\n");
+	printf(" -------\n");
 #endif
 }
 
@@ -88,7 +104,7 @@ void putablestone() {
 }
 
 void inputRow() {
-	printf("Please input row : ");
+	printf("Please input row (a, b, c) : ");
 	fflush(stdin);
 	scanf("%c", &row);
 	temp_row = (int)row - 96;
@@ -102,7 +118,7 @@ void inputRow() {
 }
 
 void inputColumn() {
-	printf("Please input column : ");
+	printf("Please input column (1, 2, 3) : ");
 	fflush(stdin);
 	scanf("%d", &column);
 	if(column < 1 || (BOARD_SIZE - 2) < column) {
@@ -112,30 +128,41 @@ void inputColumn() {
 	return;
 }
 
-void checkWin(int flag, int check_row, int check_column, int index_dir) {
+void checkWin(int flag, int count, int check_row, int check_column, int index_dir) {
 	if(index_dir < 4) {
 		int dir_r[4] ={-1, -1, 0, 1};
 		int dir_c[4] ={0, 1, 1, 1};
 #ifdef DEBUG
-		printf("<DEBUG> check   row  : %d\n", temp_row + (dir_r[index_dir] * flag));
-		printf("<DEBUG> check column : %d\n", column + (dir_c[index_dir] * flag));
+		printf("<DEBUG> check row    : %d\n", check_row + (dir_r[index_dir] * flag));
+		printf("<DEBUG> check column : %d\n", check_column + (dir_c[index_dir] * flag));
 		printf("\n");
 #endif
-		if(OUT_OF_CELL == board[temp_row + (dir_r[index_dir] * flag)][column + (dir_c[index_dir] * flag)]) {
+		if(OUT_OF_CELL == board[check_row + (dir_r[index_dir] * flag)][check_column + (dir_c[index_dir] * flag)]) {
 			if(1 == flag) {
 				flag = -1;
-				checkWin(flag, temp_row, column, index_dir);
+				checkWin(flag, count, temp_row, column, index_dir);
 			} else if(-1 == flag) {
-				judge = 1;
+				if(2 == count) {
+					judge = 1;
+				} else {
+					flag = 1;
+					count = 0;
+					checkWin(flag, count, temp_row, column, ++index_dir);
+				}
 			}
-		} else if(EMPTY_CELL == board[temp_row + (dir_r[index_dir] * flag)][column + (dir_c[index_dir] * flag)]) {
+		} else if(EMPTY_CELL == board[check_row + (dir_r[index_dir] * flag)][check_column + (dir_c[index_dir] * flag)]) {
+			drow = 1;
 			flag = 1;
-			checkWin(flag, temp_row, column, ++index_dir);
-		} else if(stone != board[temp_row + (dir_r[index_dir] * flag)][column + (dir_c[index_dir] * flag)]) {
+			count = 0;
+			checkWin(flag, count, temp_row, column, ++index_dir);
+		} else if(stone != board[check_row + (dir_r[index_dir] * flag)][check_column + (dir_c[index_dir] * flag)]) {
 			flag = 1;
-			checkWin(flag, temp_row, column, ++index_dir);
-		} else if(stone == board[temp_row + (dir_r[index_dir] * flag)][column + (dir_c[index_dir] * flag)]) {
-			checkWin(flag, check_row, check_column, index_dir);
+			count = 0;
+			checkWin(flag, count, temp_row, column, ++index_dir);
+		} else if(stone == board[check_row + (dir_r[index_dir] * flag)][check_column + (dir_c[index_dir] * flag)]) {
+			int next_row = check_row + (dir_r[index_dir] * flag);
+			int next_column = check_column + (dir_c[index_dir] * flag);
+			checkWin(flag, ++count, next_row, next_column, index_dir);
 		}
 	}
 	return;
@@ -154,11 +181,12 @@ void changePlayer() {
 }
  		
 int main(int argc, char **argv) {
+	drow = 1;
 	printf("Game Start!!\n");
 	initPlayer();
 	initStone();
 	initBoard();
-	for(int turn=0; turn<(int)pow(BOARD_SIZE-2, 2.0); turn++) {
+	while(1 == drow) {
 		showBoard();
 #ifdef DEBUG
 		printf("Turn : %d\n", turn);
@@ -169,8 +197,9 @@ int main(int argc, char **argv) {
 		putablestone();
 		if(0 == putable){
 			board[temp_row][column] = stone;
-			checkWin(1, temp_row, column, 0);
-			if(!judge) {
+			drow = 0;
+			checkWin(1, 0, temp_row, column, 0);
+			if(judge) {
 				showBoard();
 				dispWinner();
 				return 0;
@@ -179,6 +208,7 @@ int main(int argc, char **argv) {
 			changePlayer();
 		}
 	}
+	showBoard();
 	printf("Drow...\n");
 	return 0;
 }

@@ -99,6 +99,7 @@ void putablestone() {
 	if(EMPTY_CELL == board[temp_row][column]){
 		putable = 0;
 	}else{
+		printf("Please retry\n");
 		putable = 1;
 	}
 }

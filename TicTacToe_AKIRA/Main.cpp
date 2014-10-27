@@ -3,34 +3,45 @@
 #include <math.h>
 #define _DEBUG
 
+//	define user value.
 #define BOARD_SIZE 10
 #define EMPTY_CELL 0
 #define BLACK_STONE -1
 #define WHITE_STONE 1
 #define OUT_OF_CELL 9
 
-int player;
-int stone;
-int board[BOARD_SIZE][BOARD_SIZE];
-char row;
-int temp_row;
-int column;
-int putable;
-int drow;
-int judge;
+int player;	// 0, 1
+int stone;	// -1, 1
+int board[BOARD_SIZE][BOARD_SIZE];	// -1, 0, 1
+char row;	// a, b, c ...
+int temp_row;	// 0, 1, 2 ...
+int column;	// 0, 1, 2 ...
+int putable;	// 0, 1
+int drow;	// 0, 1
+int judge;	// 0, 1
 
+/*
+ * initialize player value
+ */
 void initPlayer() {
 	 player = 0;
 }
 
+/*
+ * initialize stone value
+ */
 void initStone() {
 	 stone = BLACK_STONE;
 }
 
+/*
+ * initialize board value
+ */
 void initBoard() {
 	for(int i=0; i<BOARD_SIZE; i++) {
 		for(int j=0; j<BOARD_SIZE; j++) {
 			switch(i) {
+				// 0 and BOARD_SIZE - 1 is Out of Board.
 				case 0:
 				case BOARD_SIZE - 1:
 					board[i][j] = OUT_OF_CELL;
@@ -46,6 +57,9 @@ void initBoard() {
 	}
 }
 
+/*
+ * show board
+ */
 void showBoard() {
 	printf("\n");
 #ifdef DEBUG

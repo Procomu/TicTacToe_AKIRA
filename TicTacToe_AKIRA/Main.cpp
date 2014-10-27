@@ -3,7 +3,7 @@
 #include <math.h>
 #define _DEBUG
 
-#define BOARD_SIZE 5
+#define BOARD_SIZE 10
 #define EMPTY_CELL 0
 #define BLACK_STONE -1
 #define WHITE_STONE 1
@@ -57,22 +57,19 @@ void showBoard() {
 	}
 	printf("\n");
 # else
-	printf("  1 2 3\n");
+	printf("   ");
 	for(int i=1; i<BOARD_SIZE - 1; i++) {
-		printf(" -------\n");
-		switch(i) {
-		case 1:
-			printf("a");
-			break;
-		case 2:
-			printf("b");
-			break;
-		case 3:
-			printf("c");
-			break;
-		case 4:
-			break;
+		printf("%d ", i);
+	}
+	printf("\n");
+	for(int i=1; i<BOARD_SIZE - 1; i++) {
+		printf("  ");
+		for(int i=1; i<BOARD_SIZE - 1; i++) {
+			printf("--");
 		}
+		printf("-\n");
+		int c = 'a';
+		printf("%c ", i - 1 + c);
 		for(int j=1; j<BOARD_SIZE - 1; j++) {
 			printf("|");
 			switch(board[i][j]) {
@@ -91,7 +88,11 @@ void showBoard() {
 		}
 		printf("|\n");
 	}
-	printf(" -------\n");
+	printf("  ");
+	for(int i=1; i<BOARD_SIZE - 1; i++) {
+		printf("--");
+	}
+	printf("-\n");
 #endif
 }
 
@@ -105,21 +106,23 @@ void putablestone() {
 }
 
 void inputRow() {
-	printf("Please input row (a, b, c) : ");
+	printf("Please input row (a, b, c ...) : ");
 	fflush(stdin);
 	scanf("%c", &row);
-	temp_row = (int)row - 96;
+	int c = 'a';
+	temp_row = (int)row - c + 1;
 	if(temp_row<=0) {
-		if(BOARD_SIZE-1<=temp_row) {
-			printf("Please retry\n");
-			inputRow();
-		}
+		printf("Please retry\n");
+		inputRow();
+	} else if(BOARD_SIZE-1<=temp_row) {
+		printf("Please retry\n");
+		inputRow();
 	}
 	return;
 }
 
 void inputColumn() {
-	printf("Please input column (1, 2, 3) : ");
+	printf("Please input column (1, 2, 3 ...) : ");
 	fflush(stdin);
 	scanf("%d", &column);
 	if(column < 1 || (BOARD_SIZE - 2) < column) {
@@ -143,7 +146,7 @@ void checkWin(int flag, int count, int check_row, int check_column, int index_di
 				flag = -1;
 				checkWin(flag, count, temp_row, column, index_dir);
 			} else if(-1 == flag) {
-				if(2 == count) {
+				if(BOARD_SIZE - 3 == count) {
 					judge = 1;
 				} else {
 					flag = 1;
